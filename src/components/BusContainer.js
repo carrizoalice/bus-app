@@ -1,55 +1,55 @@
 import React from 'react'
 import Bus from './Bus'
 import {getBusesPositionsSimple} from "../services/buses"
-
 import {render} from 'react-dom';
 
+import {Map, Marker, Popup, TileLayer } from "react-leaflet";
+//import {Icon } from "leaflet";
+import useSwr from "swr"; //es una extension para ir a buscar datos remotos usando hooks y swr
 
-import credentials from './credentials';
+import "../bus.css";
 
-const mapURL = `https://maps.googleapis.com/maps/api/js?v=3.exp&key=${credentials.mapsKey}`;
+const fetcher = (...args) => fetch(...args).then(response => response.json());
 
-class BusContainer extends React.Component{
-    constructor (props){
-        super(props)
+export default function BusContainer(){
 
-        this.state = {
-            buses: [],
-            isFetch: true,
-        }
-    }
-    
-    async componentDidMount (){       
-        //   fetch('https://cors-anywhere.herokuapp.com/https://apitransporte.buenosaires.gob.ar/colectivos/vehiclePositionsSimple?client_id=6e1ded6663b94c8d88c65431c50c2315&client_secret=d9d4Ca0e1Ef24cB4A87A84aeBb287660')
-        //    .then(response => response.json())
-        //   .then(busesJson => this.setState({buses : busesJson, isFetch: false}))
-        const responseJson = await getBusesPositionsSimple()
-        this.setState({ buses: responseJson, isFetch: false})
-        
-        
-    }
+        const url = "https://cors-anywhere.herokuapp.com/https://apitransporte.buenosaires.gob.ar/colectivos/vehiclePositionsSimple?client_id=6e1ded6663b94c8d88c65431c50c2315&client_secret=d9d4Ca0e1Ef24cB4A87A84aeBb287660";
+        const {data, error} = useSwr(url, fetcher);
+        const colectivos = data && !error ? data.slice(0, 500) : [];
+        const [activeColectivo, setACtiveColectivo] = React.useState(null);
 
-    // componentDidUpdate (){
-
-    // }
-
-    render(){   
-        const {isFetch, buses} = this.state
-
-        if(isFetch)  {
-            return "loading....."
-        } 
-        // const name = this.state.buses[0].route_short_name  
-        // return <Bus name={name}/>
         return (
-            buses.map((buses) => <Bus agency_name={buses.agency_name} name={buses.route_short_name} key={buses.id} />)
-            // buses.map((buses) => <Bus name={...buses} key={buses.id} />)   asi trae todos
+            <Map center={[-34.5987644, -58.42873]} zoom={12}>
+                <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>contributors'
+                />
+            
+            {colectivos.map( colectivo =>
+                <Marker
+                key={colectivo.id} 
+                position={[colectivo.latitude, colectivo.longitude]}                
+                onClick={() =>{
+                    setACtiveColectivo(colectivo);
+                }}
+                    /> 
+                )}
 
-        )
+                {activeColectivo && (
+                <Popup 
+                position={[
+                    activeColectivo.latitude, 
+                    activeColectivo.longitude
+                    ]}
 
-        
+                onClose={() =>{setACtiveColectivo(null);
+                }}
+                >
+                    <div>{activeColectivo.route_short_name}</div> 
+                </Popup>
+                )}
+            </Map>
+        ) 
     }
 
-}
 
-export default BusContainer

@@ -8,10 +8,13 @@
     "@testing-library/react": "^9.4.1",
     "@testing-library/user-event": "^7.2.1",
     "cors": "^2.8.5",
+    "leaflet": "^1.6.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-google-maps": "^9.4.5",
-    "react-scripts": "3.4.0"
+    "react-leaflet": "^2.6.1",
+    "react-scripts": "3.4.0",
+    "swr": "^0.1.18"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -33,5 +36,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "eslint-plugin-react-hooks": "^2.5.0"
   }
 }
